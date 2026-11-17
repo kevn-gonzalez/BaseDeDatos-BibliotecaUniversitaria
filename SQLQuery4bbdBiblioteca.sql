@@ -1,0 +1,102 @@
+CREATE DATABASE bbdBiblioteca;
+GO
+
+USE bbdBiblioteca;
+GO
+
+
+
+-- TABLA EDITORIALES
+CREATE TABLE EDITORIALES (
+    IDEditorial int IDENTITY(1,1) NOT NULL,
+    Nombre varchar(100) NOT NULL,
+    Pais varchar(100),
+    Activo bit NOT NULL,
+    CONSTRAINT PK_EDITORIALES PRIMARY KEY (IDEditorial),
+    CONSTRAINT UK_EDITORIALES_Nombre UNIQUE (Nombre)
+);
+
+-- TABLA CATEGORIAS
+CREATE TABLE CATEGORIAS (
+    IDCategoria int IDENTITY(1,1) NOT NULL,
+    Nombre varchar(100) NOT NULL,
+    Descripcion varchar(255),
+    CONSTRAINT PK_CATEGORIAS PRIMARY KEY (IDCategoria),
+    CONSTRAINT UK_CATEGORIAS_Nombre UNIQUE (Nombre)
+);
+
+-- TABLA AUTORES
+CREATE TABLE AUTORES (
+    IDAutor int IDENTITY(1,1) NOT NULL,
+    Nombre varchar(100) NOT NULL,
+    Nacionalidad varchar(100),
+    CONSTRAINT PK_AUTORES PRIMARY KEY (IDAutor)
+);
+
+-- TABLA SOCIOS
+CREATE TABLE SOCIOS (
+    IDSocio int IDENTITY(1,1) NOT NULL,
+    Nombre varchar(100) NOT NULL,
+    Apellido varchar(100) NOT NULL,
+    DNI varchar(20) NOT NULL,
+    Email varchar(100) NOT NULL,
+    FechaAlta date NOT NULL,
+    Activo bit NOT NULL,
+    CONSTRAINT PK_SOCIOS PRIMARY KEY (IDSocio),
+    CONSTRAINT UK_SOCIOS_DNI UNIQUE (DNI),
+    CONSTRAINT UK_SOCIOS_Email UNIQUE (Email)
+);
+
+-- TABLA LIBROS
+CREATE TABLE LIBROS (
+    IDLibro int IDENTITY(1,1) NOT NULL,
+    Titulo varchar(150) NOT NULL,
+    ISBN varchar(50) NOT NULL,
+    AnioPublicacion smallint,
+    Stock int NOT NULL,
+    IDEditorial int,
+    IDCategoria int,
+    CONSTRAINT PK_LIBROS PRIMARY KEY (IDLibro),
+    CONSTRAINT UK_LIBROS_ISBN UNIQUE (ISBN),
+    CONSTRAINT FK_LIBROS_EDITORIALES FOREIGN KEY (IDEditorial) REFERENCES EDITORIALES(IDEditorial),
+    CONSTRAINT FK_LIBROS_CATEGORIAS FOREIGN KEY (IDCategoria) REFERENCES CATEGORIAS(IDCategoria)
+);
+
+-- TABLA LIBROSAUTORES (Clave primaria compuesta)
+CREATE TABLE LIBROSAUTORES (
+    IDLibro int NOT NULL,
+    IDAutor int NOT NULL,
+    CONSTRAINT PK_LIBROSAUTORES PRIMARY KEY (IDLibro, IDAutor),
+    CONSTRAINT FK_LIBROSAUTORES_LIBROS FOREIGN KEY (IDLibro) REFERENCES LIBROS(IDLibro),
+    CONSTRAINT FK_LIBROSAUTORES_AUTORES FOREIGN KEY (IDAutor) REFERENCES AUTORES(IDAutor)
+);
+
+-- TABLA PRESTAMOS
+CREATE TABLE PRESTAMOS (
+    IDPrestamo int IDENTITY(1,1) NOT NULL,
+    FechaPrestamo date NOT NULL,
+    FechaVencimiento date NOT NULL,
+    FechaDevolucion date,
+    Estado varchar(50) NOT NULL,
+    IDLibro int NOT NULL,
+    IDSocio int NOT NULL,
+    CONSTRAINT PK_PRESTAMOS PRIMARY KEY (IDPrestamo),
+    CONSTRAINT FK_PRESTAMOS_LIBROS FOREIGN KEY (IDLibro) REFERENCES LIBROS(IDLibro),
+    CONSTRAINT FK_PRESTAMOS_SOCIOS FOREIGN KEY (IDSocio) REFERENCES SOCIOS(IDSocio)
+);
+
+-- TABLA MULTAS
+CREATE TABLE MULTAS (
+    IDMulta int IDENTITY(1,1) NOT NULL,
+    IDPrestamo int NOT NULL,
+    DiasRetraso int NOT NULL,
+    Monto decimal(10,2) NOT NULL,
+    FechaGeneracion date NOT NULL,
+    Estado varchar(50) NOT NULL,
+    FechaPago date,
+    CONSTRAINT PK_MULTAS PRIMARY KEY (IDMulta),
+    CONSTRAINT UK_MULTAS_IDPrestamo UNIQUE (IDPrestamo),
+    CONSTRAINT FK_MULTAS_PRESTAMOS FOREIGN KEY (IDPrestamo) REFERENCES PRESTAMOS(IDPrestamo)
+);
+
+
